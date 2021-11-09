@@ -1,0 +1,74 @@
+{
+  "tests": [
+    {
+      "name": "Test cache and store creation",
+      "setup": "docker build -t caching-test .",
+      "run": "docker run --rm -e TESTNAME=test-create caching-test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Test FIFO policy",
+      "setup": "docker build -t caching-test .",
+      "run": "docker run --rm -e TESTNAME=test-fifo caching-test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 2
+    },
+    {
+      "name": "Test LRU policy",
+      "setup": "docker build -t caching-test .",
+      "run": "docker run --rm -e TESTNAME=test-lru caching-test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 2
+    },
+    {
+      "name": "Test MRU policy",
+      "setup": "docker build -t caching-test .",
+      "run": "docker run --rm -e TESTNAME=test-mru caching-test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 2
+    },
+    {
+      "name": "Test FIFO simulation",
+      "setup": "make",
+      "run": "./cache_sim -p fifo < test/test_input.txt",
+      "input": "",
+      "output": "Total latency=66",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Test LRU simulation",
+      "setup": "make",
+      "run": "./cache_sim -p lru -s 20 -c 3 < test/test_input.txt",
+      "input": "",
+      "output": "Total latency=84",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    },
+    {
+      "name": "Test MRU simulation",
+      "setup": "make",
+      "run": "./cache_sim -p mru -s 20 -c 3 < test/test_input.txt",
+      "input": "",
+      "output": "Total latency=66",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 1
+    }
+  ]
+}
