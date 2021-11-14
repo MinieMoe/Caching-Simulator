@@ -9,7 +9,7 @@
 // A store is an array of pages
 typedef struct {
     int numpages;
-    page_t* pages;
+    page_t* pages;//an array of pages; pages points to the first Page element in array
 } store_t;
 
 // Initialize a memory store with the given number of pages

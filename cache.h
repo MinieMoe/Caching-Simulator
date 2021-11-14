@@ -13,7 +13,8 @@ typedef struct {
     page_t* page;
 
     // Add more metadata to the entry that you need
-    // ...
+    //  maybe a variable telling the order of page/entry was put into cache array
+    //int index;              //entry_t position in entry_t* array
 } entry_t;
 
 // Cache replacement policies
@@ -31,7 +32,8 @@ typedef struct cache {
     entry_t* entries;         // the array of entries
 
     // Add more fields as needed
-    // ...
+    //maybe an array to track the order of page/entry was put into cache array
+    int cur;                  //the latest index of entries; increment every time a new page is stored into cache
 } cache_t;
 
 
