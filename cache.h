@@ -15,6 +15,7 @@ typedef struct {
     // Add more metadata to the entry that you need
     //  maybe a variable telling the order of page/entry was put into cache array
     //int index;              //entry_t position in entry_t* array
+    int timestamp;            //record when a page has just been used recently
 } entry_t;
 
 // Cache replacement policies
@@ -34,6 +35,8 @@ typedef struct cache {
     // Add more fields as needed
     //maybe an array to track the order of page/entry was put into cache array
     int cur;                  //the latest index of entries; increment every time a new page is stored into cache
+    int timer;                //timer to keep track of how many times a page is used; tell which page is most recently used
+    int hit;                  //store the index of cache that is just hit
 } cache_t;
 
 

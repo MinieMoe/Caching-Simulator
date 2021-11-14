@@ -14,6 +14,8 @@ void store_init(store_t* store, int numpages) {
 
 // Return the page corresponding to the given memory location
 page_t* store_get(store_t* store, int location) {
+    //extracting the page.no from (memory) location
+    int pageno = location/PAGESIZE;
     //pages[location] return object of type page_t; so we have to return the address to match the function
-    return &(store->pages[location]);
+    return &(store->pages[pageno]);
 }

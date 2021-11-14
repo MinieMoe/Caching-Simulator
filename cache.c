@@ -10,16 +10,19 @@ void cache_init(cache_t* cache, int size, store_t* store, policy_t policy) {
     cache->size = size;
     cache->store = store;
     cache->cur = 0;
+    cache->timer = 0;
+    cache->hit = 0;
 
     /*reserve memories for array of entries within cache
         entries is array of cache entry, which is a struct with pointer to a page
         so basically a cache entry is a page; therefore, size (number of pages) = number of cache entries
     */
     cache->entries = (entry_t*)malloc(size*sizeof(entry_t));
-    
-    //initilize the caches within the array
+
+    //initilize the caches within the array and its timestamp
     for(int i = 0; i < size; i++){
         cache->entries[i].page = NULL;
+        cache->entries[i].timestamp = 0;
     }
 }
 
@@ -28,35 +31,118 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
     int offset = memory_location % PAGESIZE;
     int pageno = memory_location/PAGESIZE;
 
+    //everytime a page/cache is used, increment the timer
+    cache->timer ++;
+
     //deciding whether to get info from cache or store
+
+        // CACHE_HIT: go to cache if item is in cache
     if(cache_contains(cache,pageno)){
         //updates the caches?: telling the page has just been used?
-        *latency = CACHE_LATENCY;                           //cache_latency is passed on if page is retrieve from cache
-        
-    }else{
-        if(cache->cur + 1 == cache->size){
-            //use the remove policy when the cache is full
-        }
-        *latency = STORE_LATENCY;                           //store_latency is passed on if page is retrieve from store
-        /*Update the caches: 
-            storing the pages in cache
-            update cur
-        */
-        //cache->entries[cache->cur].page = &(cache->store->pages[memory_location]);
-        
-        cache->cur ++;
+        *latency = CACHE_LATENCY;                                        //cache_latency is passed on if page is retrieve from cache
+        cache->entries[cache->hit].timestamp == cache->timer;            //mark the cache's timestamp to keep track of when  it's used
 
-        //return cache->store->pages[memory_location].bytes;
+        return page_get(cache->entries[cache->hit].page,offset);
+
+    }else{//CACHE_MISS: go to Store (physical memory) to fetch data if NOT in cache
+        *latency = STORE_LATENCY;                                        //store_latency is passed on if page is retrieve from store
+        switch (cache->policy)
+        {
+        case FIFO:
+            evictFIFO(cache,memory_location,offset);
+            break;
+        
+        case LRU:
+            evictLRU(cache,memory_location,offset);
+            break;
+        case MRU:
+            evictMRU(cache,memory_location,offset);
+            break;
+        default:
+            break;
+        }
+        //use the remove policy when the cache is full
+        if(cache->cur == cache->size){
+            
+        }else{//if cache is not full, fetch page from store and append it at the end of cache/the entry_t* array
+            cache_miss(cache,cache->cur,memory_location,offset);
+            cache->cur ++;                                              //now that a new page is added to cache array, move to the next slot in cache
+            return page_get(cache->entries[cache->cur-1].page,offset);
+        }
     }
 }
-//is page_no and memory location the same??? what is memory location? is it the index of entry_t in entry_t array?
+
 bool cache_contains(cache_t* cache, int page_no) {
     for(int i = 0; i < cache->size; i++){
         if(cache->entries[i].page->pageno == page_no){
+            cache->hit = i;
             return true;
         }
     }
     return false;
 }
 
+//store a new page into cache at cacheIndex
+void cache_miss(cache_t* cache, int cacheIndex, int memory_location,int offset){
+    /*Update the caches: 
+                retrieve page from store and store it at the end of the array
+                update cur
+    */
+            cache->entries[cacheIndex].page = store_get(cache->store,memory_location);
+            cache->entries[cacheIndex].timestamp = cache->timer;        //mark the cache's timestamp to keep track of when  it's used
+            
+}
+
 //3 cache replacement policies
+
+/*MRU -evict the most recently used cache: utilize timer and timestamp
+    check which page has timestamp == timer --> that page is MRU
+        timer tells the latest time a page is used
+    put the new page into that slot
+*/
+unsigned char evictMRU(cache_t* cache, int memory_location,int offset){
+    int toReplace = 0;
+    //look for MRU
+    for(int i = 0; i < cache->size; i++){
+        if(cache->entries[i].timestamp +1 == cache->timer){
+            toReplace = i;
+            break;
+        }
+        //store the new page in the index of MRU cache
+        cache_miss(cache,toReplace,memory_location,offset);
+        return page_get(cache->entries[toReplace].page,offset);
+    }
+}
+
+/*LRU - evict the least recently used cache: utilize timer and timestamp
+    check which page in cache has the smallest timestamp --? that page is LRU
+    put the new page into that slot
+*/
+unsigned char evictLRU(cache_t* cache, int memory_location,int offset){
+    int toReplace = 0;
+    int min = cache->timer;
+    //look for LRU
+    for(int i = 0; i < cache->size; i++){
+        if(cache->entries[i].timestamp < min){
+            min = cache->entries[i].timestamp;
+            toReplace = i;
+        }
+    }
+    //store the new page in the index of MRU cache
+        cache_miss(cache,toReplace,memory_location,offset);
+    return page_get(cache->entries[toReplace].page,offset);
+}
+
+/*FIFO - first added to array is first out: use array-based queue
+    shift the array toward the front to push the first page in cache out
+*/
+unsigned char evictFIFO(cache_t* cache, int memory_location,int offset){
+    for(int i = 0; i < cache->size; i++){
+        if(i == cache->size-1){
+            cache_miss(cache,i,memory_location,offset);
+            return page_get(cache->entries[i].page,offset);
+        }
+        cache->entries[i].page = cache->entries[i+1].page;
+        cache->entries[i].timestamp = cache->entries[i+1].timestamp;
+    }
+}
