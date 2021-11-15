@@ -17,28 +17,37 @@ int main(int argc, char** argv) {
     int i=1;                        //counter to track index of argv; argv[0] = ./cache_sim
     
     if(argc < 1 || argc > 7){
-        printf("Usage: ./cache_sim [-s storesize] [-c cachesize] [-p policy]\n");
+        printf("Before while: Usage: ./cache_sim [-s storesize] [-c cachesize] [-p policy]\n");
         exit(0);
     }
     //retrieving input from command line
     while(i < argc){
         if(argv[i][1] == 's'){
             if(argv[i+1] != 0){
-                store_size= atoi(argv[i+1]);
+                store_size= atoi(argv[i+1]);      
+                i+=2;//jump to the next flag
+            }else{
+                i++;
             }
         }else if(argv[i][1] == 'c'){
             if(argv[i+1] != 0){
                 cache_size= atoi(argv[i+1]);
+                i+=2;
+            }else{
+                i++;
             }
         }else if(argv[i][1] == 'p'){
             if(argv[i+1] != 0){
                 policy = (policy_t)atoi(argv[i+1]);
+                printf("Policy: %d", policy);
+                i+=2;
+            }else{
+                i++;
             }
         }else{
-            printf("Usage: ./cache_sim [-s storesize] [-c cachesize] [-p policy]\n");
+            printf("After while: Usage: ./cache_sim [-s storesize] [-c cachesize] [-p policy]\n");
             exit(0);
         }
-        i++;
     }
 
     //initialize store and cache once get the info from input
@@ -53,10 +62,11 @@ int main(int argc, char** argv) {
     int latency = 0;
     printf("Enter the memory location you want to retrieve:\n");
     //read from user input till fgets encounter EOF
-    while(fgets(buffer,99,stdin)){
+    while(fgets(buffer,99,stdin)!=NULL){
         buffer[strlen(buffer)-1] = '\0';
         cache_get(&cache,atoi(buffer),&latency);
         total_latency += latency;
+        memset(buffer,0,99);
     }
     
 
