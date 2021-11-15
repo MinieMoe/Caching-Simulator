@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 
     int i=1;                        //counter to track index of argv; argv[0] = ./cache_sim
     
-    if(argc < || argc > 7){
+    if(argc < 1 || argc > 7){
         printf("Usage: ./cache_sim [-s storesize] [-c cachesize] [-p policy]\n");
         exit(0);
     }
