@@ -73,12 +73,16 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
 
 bool cache_contains(cache_t* cache, int page_no) {
     for(int i = 0; i < cache->size; i++){
-        if(cache->entries[i].page->pageno == page_no){
+        if(cache->entries[i].page == NULL){
+            return false;
+        }else if(cache->entries[i].page->pageno == page_no){
             cache->hit = i;
             return true;
-        }
+        }   
     }
+    //if after going through the entire cache and can't find the page, then it's not in there
     return false;
+
 }
 
 //store a new page into cache at cacheIndex
