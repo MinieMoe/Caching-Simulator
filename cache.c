@@ -73,8 +73,10 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
 
 bool cache_contains(cache_t* cache, int page_no) {
     for(int i = 0; i < cache->size; i++){
+        //check if the page has been initialized first to avoid segfault
         if(cache->entries[i].page == NULL){
             return false;
+        //if it is initialtized, is it the page we're looking for
         }else if(cache->entries[i].page->pageno == page_no){
             cache->hit = i;
             return true;
