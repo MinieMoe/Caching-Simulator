@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     cache_t cache;
 
     store_init(&store,store_size);
-    cache_init(&store,cache_size,&store,policy);
+    cache_init(&cache,cache_size,&store,policy);
 
     //read from standard input to know which page to get from memory
     char buffer [99];
