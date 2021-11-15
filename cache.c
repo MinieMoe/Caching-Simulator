@@ -38,10 +38,12 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
 
         // CACHE_HIT: go to cache if item is in cache
     if(cache_contains(cache,pageno)){
+       
         //updates the caches?: telling the page has just been used?
         *latency = CACHE_LATENCY;                                        //cache_latency is passed on if page is retrieve from cache
-        cache->entries[cache->hit].timestamp == cache->timer;            //mark the cache's timestamp to keep track of when  it's used
-
+        cache->entries[cache->hit].timestamp = cache->timer;             //mark the cache's timestamp to keep track of when  it's used
+        //printf("The page you want is in cache. It's pageno is %d at cache index %d. Timestamp: %d \n", cache->entries[cache->hit].page->pageno, cache->hit, cache->entries[cache->hit].timestamp);
+        
         return page_get(cache->entries[cache->hit].page,offset);
 
     }else{//CACHE_MISS: go to Store (physical memory) to fetch data if NOT in cache
@@ -53,7 +55,6 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
             case FIFO:
                 return evictFIFO(cache,memory_location,offset);
                 break;
-            
             case LRU:
                 return evictLRU(cache,memory_location,offset);
                 break;
@@ -95,7 +96,7 @@ void cache_miss(cache_t* cache, int cacheIndex, int memory_location,int offset){
     */
             cache->entries[cacheIndex].page = store_get(cache->store,memory_location);
             cache->entries[cacheIndex].timestamp = cache->timer;        //mark the cache's timestamp to keep track of when  it's used
-            
+            //printf("Put page at %d from store to cache at index %d. Timestamp: %d \n", memory_location, cacheIndex, cache->entries[cacheIndex].timestamp);
 }
 
 //3 cache replacement policies
@@ -107,16 +108,18 @@ void cache_miss(cache_t* cache, int cacheIndex, int memory_location,int offset){
 */
 unsigned char evictMRU(cache_t* cache, int memory_location,int offset){
     int toReplace = 0;
+    int max = 0;
     //look for MRU
     for(int i = 0; i < cache->size; i++){
-        if(cache->entries[i].timestamp +1 == cache->timer){
+        if(cache->entries[i].timestamp > max){
+            max = cache->entries[i].timestamp;
             toReplace = i;
-            break;
         }
-        //store the new page in the index of MRU cache
-        cache_miss(cache,toReplace,memory_location,offset);
-        return page_get(cache->entries[toReplace].page,offset);
     }
+    //printf("Evict page %d from cache at index %d for new page %d from store\n",cache->entries[toReplace].page->pageno, toReplace, memory_location);
+    //store the new page in the index of MRU cache
+    cache_miss(cache,toReplace,memory_location,offset);
+    return page_get(cache->entries[toReplace].page,offset);
 }
 
 /*LRU - evict the least recently used cache: utilize timer and timestamp
@@ -133,6 +136,7 @@ unsigned char evictLRU(cache_t* cache, int memory_location,int offset){
             toReplace = i;
         }
     }
+    //printf("Evict page %d from cache at index %d for new page %d from store\n",cache->entries[toReplace].page->pageno, toReplace, memory_location);
     //store the new page in the index of MRU cache
         cache_miss(cache,toReplace,memory_location,offset);
     return page_get(cache->entries[toReplace].page,offset);
