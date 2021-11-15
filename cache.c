@@ -46,24 +46,23 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency) {
 
     }else{//CACHE_MISS: go to Store (physical memory) to fetch data if NOT in cache
         *latency = STORE_LATENCY;                                        //store_latency is passed on if page is retrieve from store
-        switch (cache->policy)
-        {
-        case FIFO:
-            evictFIFO(cache,memory_location,offset);
-            break;
         
-        case LRU:
-            evictLRU(cache,memory_location,offset);
-            break;
-        case MRU:
-            evictMRU(cache,memory_location,offset);
-            break;
-        default:
-            break;
-        }
         //use the remove policy when the cache is full
         if(cache->cur == cache->size){
+            switch (cache->policy){
+            case FIFO:
+                return evictFIFO(cache,memory_location,offset);
+                break;
             
+            case LRU:
+                return evictLRU(cache,memory_location,offset);
+                break;
+            case MRU:
+                return evictMRU(cache,memory_location,offset);
+                break;
+            default:
+                break;
+            }
         }else{//if cache is not full, fetch page from store and append it at the end of cache/the entry_t* array
             cache_miss(cache,cache->cur,memory_location,offset);
             cache->cur ++;                                              //now that a new page is added to cache array, move to the next slot in cache
@@ -138,6 +137,7 @@ unsigned char evictLRU(cache_t* cache, int memory_location,int offset){
 */
 unsigned char evictFIFO(cache_t* cache, int memory_location,int offset){
     for(int i = 0; i < cache->size; i++){
+        //once everything is shifted to the left, store the new page at the end of the cache array
         if(i == cache->size-1){
             cache_miss(cache,i,memory_location,offset);
             return page_get(cache->entries[i].page,offset);

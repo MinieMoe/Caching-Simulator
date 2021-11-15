@@ -34,7 +34,7 @@ typedef struct cache {
 
     // Add more fields as needed
     //maybe an array to track the order of page/entry was put into cache array
-    int cur;                  //the latest index of entries; increment every time a new page is stored into cache
+    int cur;                  //USED ONLY WHEN CACHE IS EMPTY - the latest index of entries; increment every time a new page is stored into cache 
     int timer;                //timer to keep track of how many times a page is used; tell which page is most recently used
     int hit;                  //store the index of cache that is just hit
 } cache_t;
@@ -57,5 +57,26 @@ unsigned char cache_get(cache_t* cache, int memory_location, int* latency);
 
 // Return true if the page with page_no is present in the cache
 bool cache_contains(cache_t* cache, int page_no);
+
+//Store a new page into cache at cacheIndex
+void cache_miss(cache_t* cache, int cacheIndex, int memory_location,int offset);
+
+/*MRU -evict the most recently used cache: utilize timer and timestamp
+    check which page has timestamp == timer --> that page is MRU
+        timer tells the latest time a page is used
+    put the new page into that slot
+*/
+unsigned char evictMRU(cache_t* cache, int memory_location,int offset);
+
+/*LRU - evict the least recently used cache: utilize timer and timestamp
+    check which page in cache has the smallest timestamp --? that page is LRU
+    put the new page into that slot
+*/
+unsigned char evictLRU(cache_t* cache, int memory_location,int offset);
+
+/*FIFO - first added to array is first out: use array-based queue
+    shift the array toward the front to push the first page in cache out
+*/
+unsigned char evictFIFO(cache_t* cache, int memory_location,int offset);
 
 #endif // CACHE_H
