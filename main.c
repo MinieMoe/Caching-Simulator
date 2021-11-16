@@ -48,6 +48,8 @@ int main(int argc, char** argv) {
             }else if ((strcmp(argv[i+1],"lru") == 0)){
                 policy = LRU;
                 i+=2;
+            }else if ((strcmp(argv[i+1],"fifo") == 0)){
+                i+=2;
             }else{
                 i++;
             }
