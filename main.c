@@ -42,9 +42,9 @@ int main(int argc, char** argv) {
             printf("p %s\n", argv[i+1]);
 
             if(argv[i+1] != 0){
-                if (strcmp(argv[i+1],"MRU" == 0)){
+                if ((strcmp(argv[i+1],"MRU") == 0)){
                     policy = MRU;
-                }else if (strcmp(argv[i+1],"LRU" == 0)){
+                }else if ((strcmp(argv[i+1],"LRU") == 0)){
                     policy = LRU;
                 }
             printf("Policy: %d\n", policy);
