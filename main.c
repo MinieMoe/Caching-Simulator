@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
                 }else if ((strcmp(argv[i+1],"LRU") == 0)){
                     policy = LRU;
                 }
-            printf("Policy: %d\n", policy);
+            printf("Policy: %s\n", policy);
             i+=2;
 
             }else{
@@ -77,8 +77,6 @@ int main(int argc, char** argv) {
         total_latency += latency;
         memset(buffer,0,99);
     }
-    
-
     // print out total latency at the end
     printf("Total latency=%d\n", total_latency);
 }
