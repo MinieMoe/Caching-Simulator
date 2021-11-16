@@ -23,13 +23,15 @@ int main(int argc, char** argv) {
     //retrieving input from command line
     while(i < argc){
         if(argv[i][1] == 's'){
+            printf("s\n");
             if(argv[i+1] != 0){
                 store_size= atoi(argv[i+1]);      
-                i+=2;//jump to the next flag
+                i+=2;//jump to the next flag if -s has a value next to it
             }else{
-                i++;
+                i++;//jump to the next flag if -s doesn't have a value next to it
             }
         }else if(argv[i][1] == 'c'){
+            printf("c\n");
             if(argv[i+1] != 0){
                 cache_size= atoi(argv[i+1]);
                 i+=2;
@@ -37,10 +39,17 @@ int main(int argc, char** argv) {
                 i++;
             }
         }else if(argv[i][1] == 'p'){
+            printf("p %s\n", argv[i+1]);
+
             if(argv[i+1] != 0){
-                policy = (policy_t)atoi(argv[i+1]);
-                printf("Policy: %d", policy);
-                i+=2;
+                if (strcmp(argv[i+1],"MRU" == 0)){
+                    policy = MRU;
+                }else if (strcmp(argv[i+1],"LRU" == 0)){
+                    policy = LRU;
+                }
+            printf("Policy: %d\n", policy);
+            i+=2;
+
             }else{
                 i++;
             }
